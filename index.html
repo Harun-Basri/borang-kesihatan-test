@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Borang Maklumat Kesihatan - Great Eastern Takaful</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #f5f5f0;
+    color: #1a1a1a;
+    min-height: 100vh;
+    padding: 24px 16px 48px;
+  }
+
+  .wrapper {
+    max-width: 640px;
+    margin: 0 auto;
+  }
+
+  header {
+    background: #fff;
+    border: 1px solid #e0ddd6;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .logo-box {
+    width: 48px;
+    height: 48px;
+    background: #c8102e;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .logo-box svg { width: 28px; height: 28px; fill: #fff; }
+
+  .header-text h1 {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1a1a1a;
+    line-height: 1.3;
+  }
+
+  .header-text p {
+    font-size: 12px;
+    color: #888;
+    margin-top: 2px;
+  }
+
+  .steps {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .step {
+    flex: 1;
+    height: 4px;
+    background: #e0ddd6;
+    border-radius: 2px;
+    transition: background 0.3s;
+  }
+
+  .step.active { background: #c8102e; }
+  .step.done { background: #888; }
+
+  .step-label {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .step-label span {
+    font-size: 11px;
+    color: #888;
+    flex: 1;
+    text-align: center;
+  }
+
+  .step-label span.active { color: #c8102e; font-weight: 600; }
+
+  .card {
+    background: #fff;
+    border: 1px solid #e0ddd6;
+    border-radius: 12px;
+    padding: 28px 24px;
+    margin-bottom: 16px;
+  }
+
+  .card h2 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f0ede6;
+  }
+
+  .field { margin-bottom: 20px; }
+
+  .field:last-child { margin-bottom: 0; }
+
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: #444;
+    margin-bottom: 6px;
+  }
+
+  label .req { color: #c8102e; margin-left: 2px; }
+
+  input[type="text"],
+  textarea {
+    width: 100%;
+    padding: 10px 13px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #1a1a1a;
+    background: #fff;
+    transition: border-color 0.2s;
+    font-family: inherit;
+  }
+
+  input[type="text"]:focus,
+  textarea:focus {
+    outline: none;
+    border-color: #c8102e;
+    box-shadow: 0 0 0 3px rgba(200,16,46,0.08);
+  }
+
+  textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+
+  .ic-input {
+    font-family: 'Courier New', monospace;
+    letter-spacing: 0.08em;
+    font-size: 15px;
+  }
+
+  .ic-hint {
+    font-size: 11px;
+    color: #aaa;
+    margin-top: 5px;
+  }
+
+  .auto-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .auto-field {
+    background: #f8f7f4;
+    border: 1px solid #e8e5de;
+    border-radius: 8px;
+    padding: 10px 13px;
+  }
+
+  .auto-field .auto-label {
+    font-size: 11px;
+    color: #aaa;
+    margin-bottom: 2px;
+  }
+
+  .auto-field .auto-value {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1a1a1a;
+    min-height: 22px;
+  }
+
+  .auto-field .auto-value.filled { color: #c8102e; }
+
+  .radio-group {
+    display: flex;
+    gap: 10px;
+  }
+
+  .radio-btn {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    color: #666;
+    transition: all 0.2s;
+    user-select: none;
+  }
+
+  .radio-btn:hover { border-color: #bbb; background: #fafafa; }
+
+  .radio-btn.selected {
+    border-color: #c8102e;
+    background: #fff5f7;
+    color: #c8102e;
+  }
+
+  .radio-btn input { display: none; }
+
+  .sub-fields {
+    margin-top: 14px;
+    padding: 14px 16px;
+    background: #f8f7f4;
+    border-radius: 8px;
+    border-left: 3px solid #e0ddd6;
+    display: none;
+  }
+
+  .sub-fields.visible { display: block; }
+
+  .sub-fields .field { margin-bottom: 14px; }
+  .sub-fields .field:last-child { margin-bottom: 0; }
+
+  .sub-fields label { font-size: 12px; color: #666; }
+
+  .sub-fields input[type="text"],
+  .sub-fields textarea {
+    font-size: 13px;
+    padding: 8px 11px;
+    background: #fff;
+  }
+
+  .q-number {
+    font-size: 11px;
+    font-weight: 600;
+    color: #c8102e;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 5px;
+  }
+
+  .q-text {
+    font-size: 14px;
+    font-weight: 500;
+    color: #1a1a1a;
+    margin-bottom: 10px;
+    line-height: 1.4;
+  }
+
+  .nav-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+  }
+
+  .btn {
+    flex: 1;
+    padding: 13px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+  }
+
+  .btn-back {
+    background: #fff;
+    border: 1px solid #ddd;
+    color: #666;
+  }
+
+  .btn-back:hover { background: #f5f5f0; }
+
+  .btn-next {
+    background: #c8102e;
+    color: #fff;
+  }
+
+  .btn-next:hover { background: #a80d26; }
+
+  .btn-submit {
+    background: #1a6b3a;
+    color: #fff;
+  }
+
+  .btn-submit:hover { background: #145530; }
+
+  .notice {
+    font-size: 11px;
+    color: #aaa;
+    text-align: center;
+    margin-top: 16px;
+    line-height: 1.6;
+  }
+
+  .page { display: none; }
+  .page.active { display: block; }
+
+  .success-card {
+    background: #fff;
+    border: 1px solid #e0ddd6;
+    border-radius: 12px;
+    padding: 40px 24px;
+    text-align: center;
+  }
+
+  .success-icon {
+    width: 56px;
+    height: 56px;
+    background: #e6f4ec;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    font-size: 28px;
+  }
+
+  .success-card h2 { font-size: 18px; margin-bottom: 8px; }
+  .success-card p { font-size: 13px; color: #888; margin-bottom: 24px; line-height: 1.6; }
+
+  .error-msg {
+    font-size: 12px;
+    color: #c8102e;
+    margin-top: 5px;
+    display: none;
+  }
+
+  .field.has-error input,
+  .field.has-error textarea {
+    border-color: #c8102e;
+  }
+
+  .field.has-error .error-msg { display: block; }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <header>
+    <div class="logo-box">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15v-4H7l5-8v4h4l-5 8z"/></svg>
+    </div>
+    <div class="header-text">
+      <h1>Borang Maklumat Kesihatan</h1>
+      <p>Great Eastern Takaful Berhad</p>
+    </div>
+  </header>
+
+  <div class="steps">
+    <div class="step active" id="s1"></div>
+    <div class="step" id="s2"></div>
+    <div class="step" id="s3"></div>
+  </div>
+  <div class="step-label">
+    <span class="active" id="sl1">Maklumat Peribadi</span>
+    <span id="sl2">Soalan 1 – 6</span>
+    <span id="sl3">Soalan 7 – 12</span>
+  </div>
+
+  <!-- PAGE 1 -->
+  <div class="page active" id="page1">
+    <div class="card">
+      <h2>Maklumat Peribadi</h2>
+
+      <div class="field" id="f-nama">
+        <label>Nama Penuh <span class="req">*</span></label>
+        <input type="text" id="nama" placeholder="Contoh: AHMAD BIN ABDULLAH" oninput="autoUpper(this)">
+        <div class="error-msg">Sila masukkan nama penuh.</div>
+      </div>
+
+      <div class="field" id="f-ic">
+        <label>No. Kad Pengenalan <span class="req">*</span></label>
+        <input type="text" id="ic" class="ic-input" placeholder="xxxxxx-xx-xxxx" maxlength="14" oninput="formatIC(this)">
+        <div class="ic-hint">Masukkan nombor sahaja. Format: xxxxxx-xx-xxxx</div>
+        <div class="error-msg">Sila masukkan No. KP yang lengkap.</div>
+      </div>
+
+      <div class="auto-row">
+        <div class="auto-field">
+          <div class="auto-label">Umur</div>
+          <div class="auto-value" id="display-umur">—</div>
+        </div>
+        <div class="auto-field">
+          <div class="auto-label">Jantina</div>
+          <div class="auto-value" id="display-jantina">—</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn btn-next" style="flex:1" onclick="goPage(2)">Seterusnya →</button>
+    </div>
+    <p class="notice">Maklumat anda adalah SULIT dan hanya digunakan untuk tujuan permohonan takaful sahaja.</p>
+  </div>
+
+  <!-- PAGE 2 -->
+  <div class="page" id="page2">
+    <div class="card">
+      <h2>Soalan Kesihatan (1 – 6)</h2>
+
+      <div class="field" id="f-q1">
+        <div class="q-number">Soalan 1</div>
+        <div class="q-text">Apakah masalah / rungutan kesihatan anda?</div>
+        <textarea id="q1" placeholder="Huraikan masalah kesihatan anda..."></textarea>
+        <div class="error-msg">Sila isi jawapan.</div>
+      </div>
+
+      <div class="field" id="f-q2">
+        <div class="q-number">Soalan 2</div>
+        <div class="q-text">Tarikh simptom pertama kali muncul?</div>
+        <input type="date" id="q2" style="width:100%;padding:10px 13px;border:1px solid #ddd;border-radius:8px;font-size:14px;color:#1a1a1a;background:#fff;font-family:inherit;transition:border-color 0.2s;" onfocus="this.style.borderColor='#c8102e'" onblur="this.style.borderColor='#ddd'">
+        <div class="error-msg">Sila pilih tarikh.</div>
+      </div>
+
+      <div class="field" id="f-q3">
+        <div class="q-number">Soalan 3</div>
+        <div class="q-text">Bahagian badan yang terlibat?</div>
+        <input type="text" id="q3" placeholder="Contoh: Dada, kaki kanan, belakang...">
+        <div class="error-msg">Sila isi jawapan.</div>
+      </div>
+
+      <div class="field">
+        <div class="q-number">Soalan 4</div>
+        <div class="q-text">Adakah anda mendapatkan nasihat doktor?</div>
+        <div class="radio-group">
+          <label class="radio-btn" id="q4-ya" onclick="toggle('q4','Ya')"><input type="radio" name="q4" value="Ya"> Ya</label>
+          <label class="radio-btn" id="q4-tidak" onclick="toggle('q4','Tidak')"><input type="radio" name="q4" value="Tidak"> Tidak</label>
+        </div>
+        <div class="sub-fields" id="sub-q4">
+          <div class="field">
+            <label>Tarikh pertama berjumpa doktor</label>
+            <input type="date" id="q4a" style="width:100%;padding:10px 13px;border:1px solid #ddd;border-radius:8px;font-size:14px;color:#1a1a1a;background:#fff;font-family:inherit;" onfocus="this.style.borderColor='#c8102e'" onblur="this.style.borderColor='#ddd'">
+          </div>
+          <div class="field">
+            <label>Tarikh susulan (jika ada)</label>
+            <input type="date" id="q4b" style="width:100%;padding:10px 13px;border:1px solid #ddd;border-radius:8px;font-size:14px;color:#1a1a1a;background:#fff;font-family:inherit;" onfocus="this.style.borderColor='#c8102e'" onblur="this.style.borderColor='#ddd'">
+          </div>
+        </div>
+      </div>
+
+      <div class="field" id="f-q5">
+        <div class="q-number">Soalan 5</div>
+        <div class="q-text">Apakah diagnosis doktor?</div>
+        <textarea id="q5" placeholder="Nyatakan diagnosis yang diberikan oleh doktor..."></textarea>
+        <div class="error-msg">Sila isi jawapan.</div>
+      </div>
+
+      <div class="field">
+        <div class="q-number">Soalan 6</div>
+        <div class="q-text">Adakah anda dimasukkan ke hospital?</div>
+        <div class="radio-group">
+          <label class="radio-btn" id="q6-ya" onclick="toggle('q6','Ya')"><input type="radio" name="q6" value="Ya"> Ya</label>
+          <label class="radio-btn" id="q6-tidak" onclick="toggle('q6','Tidak')"><input type="radio" name="q6" value="Tidak"> Tidak</label>
+        </div>
+        <div class="sub-fields" id="sub-q6">
+          <div class="field">
+            <label>Nama Doktor yang merawat</label>
+            <input type="text" id="q6a" placeholder="DR. ..." oninput="autoUpper(this)">
+          </div>
+          <div class="field">
+            <label>Nama Hospital</label>
+            <input type="text" id="q6b" placeholder="HOSPITAL ..." oninput="autoUpper(this)">
+          </div>
+          <div class="field">
+            <label>Tarikh masuk wad</label>
+            <input type="date" id="q6c" style="width:100%;padding:10px 13px;border:1px solid #ddd;border-radius:8px;font-size:14px;color:#1a1a1a;background:#fff;font-family:inherit;" onfocus="this.style.borderColor='#c8102e'" onblur="this.style.borderColor='#ddd'">
+          </div>
+          <div class="field">
+            <label>Tempoh di wad</label>
+            <input type="text" id="q6d" placeholder="Contoh: 3 hari">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn btn-back" onclick="goPage(1)">← Kembali</button>
+      <button class="btn btn-next" onclick="goPage(3)">Seterusnya →</button>
+    </div>
+  </div>
+
+  <!-- PAGE 3 -->
+  <div class="page" id="page3">
+    <div class="card">
+      <h2>Soalan Kesihatan (7 – 12)</h2>
+
+      <div class="field">
+        <div class="q-number">Soalan 7</div>
+        <div class="q-text">Adakah sebarang rawatan diberikan?</div>
+        <div class="radio-group">
+          <label class="radio-btn" id="q7-ya" onclick="toggle('q7','Ya')"><input type="radio" name="q7" value="Ya"> Ya</label>
+          <label class="radio-btn" id="q7-tidak" onclick="toggle('q7','Tidak')"><input type="radio" name="q7" value="Tidak"> Tidak</label>
+        </div>
+        <div class="sub-fields" id="sub-q7">
+          <div class="field">
+            <label>Butiran rawatan yang diberikan</label>
+            <textarea id="q7a" placeholder="Huraikan rawatan..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="q-number">Soalan 8</div>
+        <div class="q-text">Adakah ubat ditetapkan oleh doktor?</div>
+        <div class="radio-group">
+          <label class="radio-btn" id="q8-ya" onclick="toggle('q8','Ya')"><input type="radio" name="q8" value="Ya"> Ya</label>
+          <label class="radio-btn" id="q8-tidak" onclick="toggle('q8','Tidak')"><input type="radio" name="q8" value="Tidak"> Tidak</label>
+        </div>
+        <div class="sub-fields" id="sub-q8">
+          <div class="field">
+            <label>Nama ubat</label>
+            <input type="text" id="q8a" placeholder="Nama ubat yang ditetapkan...">
+          </div>
+          <div class="field">
+            <label>Jangka masa pengambilan ubat</label>
+            <input type="text" id="q8b" placeholder="Contoh: 7 hari, 1 bulan...">
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="q-number">Soalan 9</div>
+        <div class="q-text">Adakah pembedahan / operasi dilakukan?</div>
+        <div class="radio-group">
+          <label class="radio-btn" id="q9-ya" onclick="toggle('q9','Ya')"><input type="radio" name="q9" value="Ya"> Ya</label>
+          <label class="radio-btn" id="q9-tidak" onclick="toggle('q9','Tidak')"><input type="radio" name="q9" value="Tidak"> Tidak</label>
+        </div>
+        <div class="sub-fields" id="sub-q9">
+          <div class="field">
+            <label>Jenis pembedahan / operasi</label>
+            <input type="text" id="q9a" placeholder="Jenis pembedahan...">
+          </div>
+          <div class="field">
+            <label>Tarikh pembedahan</label>
+            <input type="date" id="q9b" style="width:100%;padding:10px 13px;border:1px solid #ddd;border-radius:8px;font-size:14px;color:#1a1a1a;background:#fff;font-family:inherit;" onfocus="this.style.borderColor='#c8102e'" onblur="this.style.borderColor='#ddd'">
+          </div>
+          <div class="field">
+            <label>Hospital pembedahan dilakukan</label>
+            <input type="text" id="q9c" placeholder="NAMA HOSPITAL..." oninput="autoUpper(this)">
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="q-number">Soalan 10</div>
+        <div class="q-text">Adakah doktor meminta anda berhenti rawatan / ubat?</div>
+        <div class="radio-group">
+          <label class="radio-btn" id="q10-ya" onclick="toggle('q10','Ya')"><input type="radio" name="q10" value="Ya"> Ya</label>
+          <label class="radio-btn" id="q10-tidak" onclick="toggle('q10','Tidak')"><input type="radio" name="q10" value="Tidak"> Tidak</label>
+        </div>
+        <div class="sub-fields" id="sub-q10">
+          <div class="field">
+            <label>Tarikh berhenti rawatan / ubat</label>
+            <input type="date" id="q10a" style="width:100%;padding:10px 13px;border:1px solid #ddd;border-radius:8px;font-size:14px;color:#1a1a1a;background:#fff;font-family:inherit;" onfocus="this.style.borderColor='#c8102e'" onblur="this.style.borderColor='#ddd'">
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="q-number">Soalan 11</div>
+        <div class="q-text">Adakah masalah kesihatan ini pernah berulang?</div>
+        <div class="radio-group">
+          <label class="radio-btn" id="q11-ya" onclick="toggle('q11','Ya')"><input type="radio" name="q11" value="Ya"> Ya</label>
+          <label class="radio-btn" id="q11-tidak" onclick="toggle('q11','Tidak')"><input type="radio" name="q11" value="Tidak"> Tidak</label>
+        </div>
+        <div class="sub-fields" id="sub-q11">
+          <div class="field">
+            <label>Tarikh-tarikh masalah berulang</label>
+            <textarea id="q11a" placeholder="Senaraikan tarikh-tarikh berulang..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="q-number">Soalan 12</div>
+        <div class="q-text">Adakah terdapat penyakit lain / penyakit bawaan yang diberitahu oleh doktor?</div>
+        <div class="radio-group">
+          <label class="radio-btn" id="q12-ya" onclick="toggle('q12','Ya')"><input type="radio" name="q12" value="Ya"> Ya</label>
+          <label class="radio-btn" id="q12-tidak" onclick="toggle('q12','Tidak')"><input type="radio" name="q12" value="Tidak"> Tidak</label>
+        </div>
+        <div class="sub-fields" id="sub-q12">
+          <div class="field">
+            <label>Diagnosis penyakit lain</label>
+            <input type="text" id="q12a" placeholder="NAMA DIAGNOSIS..." oninput="autoUpper(this)">
+          </div>
+          <div class="field">
+            <label>Jenis rawatan yang diberikan</label>
+            <textarea id="q12b" placeholder="Huraikan rawatan..."></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn btn-back" onclick="goPage(2)">← Kembali</button>
+      <button class="btn btn-submit" onclick="submitForm()">Muat Turun PDF</button>
+    </div>
+  </div>
+
+  <!-- SUCCESS PAGE -->
+  <div class="page" id="page4">
+    <div class="success-card">
+      <div class="success-icon">✓</div>
+      <h2>PDF Berjaya Dimuat Turun</h2>
+      <p>Sila hantar fail PDF tersebut kepada ejen takaful anda melalui WhatsApp.</p>
+      <button class="btn btn-next" style="max-width:280px; margin:0 auto;" onclick="resetForm()">Isi Borang Baru</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+var state = { q4:'', q6:'', q7:'', q8:'', q9:'', q10:'', q11:'', q12:'' };
+
+function autoUpper(el) {
+  var pos = el.selectionStart;
+  el.value = el.value.toUpperCase();
+  el.setSelectionRange(pos, pos);
+}
+
+function formatIC(el) {
+  var raw = el.value.replace(/[^0-9]/g, '').substring(0, 12);
+  var out = raw;
+  if (raw.length > 6) out = raw.substring(0,6) + '-' + raw.substring(6);
+  if (raw.length > 8) out = raw.substring(0,6) + '-' + raw.substring(6,8) + '-' + raw.substring(8);
+  el.value = out;
+  detectIC(raw);
+}
+
+function detectIC(raw) {
+  var umurEl = document.getElementById('display-umur');
+  var jantinaEl = document.getElementById('display-jantina');
+
+  if (raw.length < 12) {
+    umurEl.textContent = '—'; umurEl.className = 'auto-value';
+    jantinaEl.textContent = '—'; jantinaEl.className = 'auto-value';
+    return;
+  }
+
+  var yy = parseInt(raw.substring(0,2));
+  var mm = parseInt(raw.substring(2,4));
+  var dd = parseInt(raw.substring(4,6));
+  var lastDigit = parseInt(raw.substring(11,12));
+
+  var fullYear = yy >= 0 && yy <= 26 ? 2000 + yy : 1900 + yy;
+  var age = 2026 - fullYear;
+  var jantina = (lastDigit % 2 !== 0) ? 'Lelaki' : 'Perempuan';
+
+  umurEl.textContent = age + ' tahun';
+  umurEl.className = 'auto-value filled';
+  jantinaEl.textContent = jantina;
+  jantinaEl.className = 'auto-value filled';
+}
+
+function toggle(q, val) {
+  state[q] = val;
+  var ya = document.getElementById(q + '-ya');
+  var tidak = document.getElementById(q + '-tidak');
+  var sub = document.getElementById('sub-' + q);
+  if (val === 'Ya') {
+    ya.classList.add('selected');
+    tidak.classList.remove('selected');
+    if (sub) sub.classList.add('visible');
+  } else {
+    tidak.classList.add('selected');
+    ya.classList.remove('selected');
+    if (sub) sub.classList.remove('visible');
+  }
+}
+
+function goPage(n) {
+  if (n === 2 && !validatePage1()) return;
+  if (n === 3 && !validatePage2()) return;
+  for (var i = 1; i <= 4; i++) {
+    document.getElementById('page' + i).classList.remove('active');
+  }
+  document.getElementById('page' + n).classList.add('active');
+  updateSteps(n);
+  window.scrollTo(0,0);
+}
+
+function updateSteps(n) {
+  for (var i = 1; i <= 3; i++) {
+    var s = document.getElementById('s' + i);
+    var sl = document.getElementById('sl' + i);
+    s.className = 'step';
+    sl.className = '';
+    if (i < n) { s.classList.add('done'); }
+    else if (i === n) { s.classList.add('active'); sl.classList.add('active'); }
+  }
+}
+
+function validatePage1() {
+  var ok = true;
+  var nama = document.getElementById('nama').value.trim();
+  var ic = document.getElementById('ic').value.replace(/[^0-9]/g,'');
+  clearErr('f-nama'); clearErr('f-ic');
+  if (!nama) { showErr('f-nama'); ok = false; }
+  if (ic.length !== 12) { showErr('f-ic'); ok = false; }
+  return ok;
+}
+
+function validatePage2() {
+  var ok = true;
+  clearErr('f-q1'); clearErr('f-q2'); clearErr('f-q3'); clearErr('f-q5');
+  if (!document.getElementById('q1').value.trim()) { showErr('f-q1'); ok = false; }
+  if (!document.getElementById('q2').value.trim()) { showErr('f-q2'); ok = false; }
+  if (!document.getElementById('q3').value.trim()) { showErr('f-q3'); ok = false; }
+  if (!document.getElementById('q5').value.trim()) { showErr('f-q5'); ok = false; }
+  return ok;
+}
+
+function showErr(id) {
+  var el = document.getElementById(id);
+  if (el) el.classList.add('has-error');
+}
+
+function clearErr(id) {
+  var el = document.getElementById(id);
+  if (el) el.classList.remove('has-error');
+}
+
+function g(id) { return (document.getElementById(id) || {}).value || ''; }
+
+function submitForm() {
+  if (!validatePage2()) { goPage(2); return; }
+
+  var { jsPDF } = window.jspdf;
+  var doc = new jsPDF({ unit: 'mm', format: 'a4' });
+
+  var umur = document.getElementById('display-umur').textContent;
+  var jantina = document.getElementById('display-jantina').textContent;
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(13);
+  doc.setTextColor(200, 16, 46);
+  doc.text('BORANG MAKLUMAT KESIHATAN', 105, 18, { align: 'center' });
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.setTextColor(120, 120, 120);
+  doc.text('Great Eastern Takaful Berhad', 105, 24, { align: 'center' });
+
+  doc.setDrawColor(200, 16, 46);
+  doc.setLineWidth(0.5);
+  doc.line(15, 27, 195, 27);
+
+  var y = 35;
+  var pageH = 280;
+
+  function checkPage(needed) {
+    if (y + needed > pageH) { doc.addPage(); y = 20; }
+  }
+
+  function sectionHead(title) {
+    checkPage(12);
+    doc.setFillColor(240, 240, 238);
+    doc.roundedRect(15, y, 180, 8, 2, 2, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9);
+    doc.setTextColor(80, 80, 80);
+    doc.text(title, 19, y + 5.5);
+    y += 13;
+  }
+
+  function row(label, value) {
+    var val = value || '—';
+    checkPage(10);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8.5);
+    doc.setTextColor(100, 100, 100);
+    doc.text(label, 19, y);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(30, 30, 30);
+    var lines = doc.splitTextToSize(val, 130);
+    doc.text(lines, 65, y);
+    y += Math.max(lines.length * 5, 7);
+  }
+
+  function qBlock(num, question, answer, subData) {
+    var ansText = answer || '—';
+    checkPage(16);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    doc.setTextColor(200, 16, 46);
+    doc.text('SOALAN ' + num, 19, y);
+    y += 5;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8.5);
+    doc.setTextColor(30, 30, 30);
+    var qlines = doc.splitTextToSize(question, 172);
+    doc.text(qlines, 19, y);
+    y += qlines.length * 5 + 2;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8.5);
+    doc.setTextColor(50, 50, 50);
+    var alines = doc.splitTextToSize('Jawapan: ' + ansText, 172);
+    doc.text(alines, 19, y);
+    y += alines.length * 5;
+    if (subData && subData.length) {
+      subData.forEach(function(sub) {
+        if (sub.v) {
+          checkPage(8);
+          doc.setTextColor(80, 80, 80);
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(8);
+          doc.text(sub.l + ':', 24, y);
+          doc.setFont('helvetica', 'normal');
+          var vlines = doc.splitTextToSize(sub.v, 120);
+          doc.text(vlines, 75, y);
+          y += Math.max(vlines.length * 5, 6);
+        }
+      });
+    }
+    doc.setDrawColor(220, 220, 215);
+    doc.setLineWidth(0.2);
+    doc.line(19, y + 1, 191, y + 1);
+    y += 6;
+  }
+
+  sectionHead('BAHAGIAN 1 — MAKLUMAT PERIBADI');
+  row('Nama Penuh', g('nama'));
+  row('No. Kad Pengenalan', g('ic'));
+  row('Umur', umur);
+  row('Jantina', jantina);
+  y += 4;
+
+  sectionHead('BAHAGIAN 2 — SOALAN KESIHATAN (1–6)');
+
+  qBlock(1, 'Apakah masalah / rungutan kesihatan anda?', g('q1'));
+  function fmtDate(val) { return val ? val.split('-').reverse().join('/') : '—'; }
+
+  var q2raw = g('q2');
+  var q2fmt = fmtDate(q2raw);
+  qBlock(2, 'Tarikh simptom pertama kali muncul?', q2fmt);
+  qBlock(3, 'Bahagian badan yang terlibat?', g('q3'));
+  qBlock(4, 'Adakah anda mendapatkan nasihat doktor?', state.q4, [
+    { l: 'Tarikh pertama jumpa doktor', v: fmtDate(g('q4a')) },
+    { l: 'Tarikh susulan', v: fmtDate(g('q4b')) }
+  ]);
+  qBlock(5, 'Apakah diagnosis doktor?', g('q5'));
+  qBlock(6, 'Adakah anda dimasukkan ke hospital?', state.q6, [
+    { l: 'Nama Doktor', v: g('q6a') },
+    { l: 'Nama Hospital', v: g('q6b') },
+    { l: 'Tarikh masuk wad', v: fmtDate(g('q6c')) },
+    { l: 'Tempoh di wad', v: g('q6d') }
+  ]);
+
+  sectionHead('BAHAGIAN 3 — SOALAN KESIHATAN (7–12)');
+
+  qBlock(7, 'Adakah sebarang rawatan diberikan?', state.q7, [
+    { l: 'Butiran rawatan', v: g('q7a') }
+  ]);
+  qBlock(8, 'Adakah ubat ditetapkan oleh doktor?', state.q8, [
+    { l: 'Nama ubat', v: g('q8a') },
+    { l: 'Jangka masa pengambilan', v: g('q8b') }
+  ]);
+  qBlock(9, 'Adakah pembedahan / operasi dilakukan?', state.q9, [
+    { l: 'Jenis pembedahan', v: g('q9a') },
+    { l: 'Tarikh pembedahan', v: fmtDate(g('q9b')) },
+    { l: 'Hospital', v: g('q9c') }
+  ]);
+  qBlock(10, 'Adakah doktor meminta anda berhenti rawatan / ubat?', state.q10, [
+    { l: 'Tarikh berhenti', v: fmtDate(g('q10a')) }
+  ]);
+  qBlock(11, 'Adakah masalah kesihatan ini pernah berulang?', state.q11, [
+    { l: 'Tarikh-tarikh berulang', v: g('q11a') }
+  ]);
+  qBlock(12, 'Adakah terdapat penyakit lain / penyakit bawaan yang diberitahu oleh doktor?', state.q12, [
+    { l: 'Diagnosis', v: g('q12a') },
+    { l: 'Jenis rawatan', v: g('q12b') }
+  ]);
+
+  checkPage(30);
+  y += 6;
+  doc.setDrawColor(200, 16, 46);
+  doc.setLineWidth(0.4);
+  doc.line(15, y, 195, y);
+  y += 8;
+  doc.setFont('helvetica', 'italic');
+  doc.setFontSize(7.5);
+  doc.setTextColor(140, 140, 140);
+  doc.text('Saya mengakui bahawa semua jawapan yang telah diberi adalah benar dan mengikut pengetahuan saya.', 105, y, { align: 'center' });
+  y += 12;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.setTextColor(80, 80, 80);
+  doc.text('Tandatangan: ___________________________', 19, y);
+  doc.text('Tarikh: _______________', 140, y);
+
+  var filename = 'GMIQ_' + (g('nama') || 'Borang').replace(/\s+/g,'_') + '.pdf';
+  doc.save(filename);
+
+  goPage(4);
+}
+
+function resetForm() {
+  document.querySelectorAll('input[type="text"], textarea').forEach(function(el){ el.value = ''; });
+  document.getElementById('display-umur').textContent = '—';
+  document.getElementById('display-umur').className = 'auto-value';
+  document.getElementById('display-jantina').textContent = '—';
+  document.getElementById('display-jantina').className = 'auto-value';
+  Object.keys(state).forEach(function(k){ state[k] = ''; });
+  document.querySelectorAll('.radio-btn').forEach(function(el){ el.classList.remove('selected'); });
+  document.querySelectorAll('.sub-fields').forEach(function(el){ el.classList.remove('visible'); });
+  goPage(1);
+}
+</script>
+</body>
+</html>
