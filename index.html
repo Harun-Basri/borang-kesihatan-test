@@ -746,93 +746,89 @@ async function submitForm() {
   var font = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
   var pages = pdfDoc.getPages();
 
-  function drawText(pageIdx, text, x, structY, size) {
+  function T(pi, text, x, y, size) {
     if (!text) return;
-    var page = pages[pageIdx];
-    var y = 842 - structY;
-    page.drawText(String(text), { x: x, y: y, size: size || 8, font: font, color: PDFLib.rgb(0,0,0) });
+    pages[pi].drawText(String(text), {
+      x: x, y: y, size: size || 8, font: font, color: PDFLib.rgb(0, 0, 0)
+    });
+  }
+  function X(pi, x, y) {
+    pages[pi].drawText('X', {
+      x: x, y: y, size: 7, font: font, color: PDFLib.rgb(0, 0, 0)
+    });
   }
 
-  function drawX(pageIdx, structY, x) {
-    var page = pages[pageIdx];
-    var y = 842 - structY;
-    page.drawText('X', { x: x-3, y: y-4, size: 7, font: font, color: PDFLib.rgb(0,0,0) });
-  }
+  // ══ PAGE 1 ══════════════════════════════════════════════════════════════
+  T(0, g('nama'), 149, 347, 8);
+  T(0, umur,       52, 325, 8);
+  if (jantina === 'Lelaki') { X(0, 219, 323); }
+  else                      { X(0, 277, 323); }
 
-  // PAGE 1: Personal Info
-  drawText(0, g('nama'), 148, 497, 8);
-  drawText(0, umur, 50, 519, 8);
-  if (jantina === 'Lelaki') { drawX(0, 517.5, 221.8); }
-  else { drawX(0, 517.5, 279.5); }
-
-  // PAGE 2: Q1-Q9
-  drawText(1, g('q1'), 45, 88, 7.5);
-  drawText(1, fmtDate(g('q2')), 110, 131, 7.5);
-  drawText(1, g('q3'), 45, 160, 7.5);
+  // ══ PAGE 2 ══════════════════════════════════════════════════════════════
+  T(1, g('q1'),          45, 739, 7.5);
+  T(1, fmtDate(g('q2')), 47, 706, 7.5);
+  T(1, g('q3'),          45, 672, 7.5);
 
   if (state.q4 === 'Ya') {
-    drawX(1, 204.9, 58.1);
-    drawText(1, fmtDate(g('q4a')), 260, 221, 7);
-    drawText(1, fmtDate(g('q4b')), 400, 221, 7);
-  } else if (state.q4 === 'Tidak') { drawX(1, 204.9, 97.3); }
+    X(1, 56, 635);
+    T(1, fmtDate(g('q4a')), 260, 607, 7);
+  } else if (state.q4 === 'Tidak') { X(1, 95, 635); }
 
-  drawText(1, g('q5'), 45, 268, 7.5);
+  T(1, g('q5'), 45, 571, 7.5);
 
   if (state.q6 === 'Ya') {
-    drawX(1, 308.5, 58.0);
-    drawText(1, g('q6a'), 105, 351, 7.5);
-    drawText(1, g('q6b'), 80, 369, 7.5);
-    drawText(1, fmtDate(g('q6c')), 165, 387, 7.5);
-    drawText(1, g('q6d'), 133, 412, 7.5);
-  } else if (state.q6 === 'Tidak') { drawX(1, 308.5, 97.0); }
+    X(1, 56, 531);
+    T(1, g('q6a'), 103, 491, 7.5);
+    T(1, g('q6b'),  45, 473, 7.5);
+    T(1, fmtDate(g('q6c')),  47, 453, 7.5);
+    T(1, g('q6d'), 131, 430, 7.5);
+  } else if (state.q6 === 'Tidak') { X(1, 95, 531); }
 
   if (state.q7 === 'Ya') {
-    drawX(1, 457.8, 58.0);
-    drawText(1, g('q7a'), 45, 493, 7.5);
-  } else if (state.q7 === 'Tidak') { drawX(1, 457.8, 97.0); }
+    X(1, 56, 382);
+    T(1, g('q7a'), 45, 344, 7.5);
+  } else if (state.q7 === 'Tidak') { X(1, 95, 382); }
 
   if (state.q8 === 'Ya') {
-    drawX(1, 534.3, 58.0);
-    drawText(1, g('q8a'), 122, 572, 7.5);
-    drawText(1, g('q8b'), 80, 594, 7.5);
-  } else if (state.q8 === 'Tidak') { drawX(1, 534.3, 97.0); }
+    X(1, 56, 306);
+    T(1, g('q8a'), 120, 265, 7.5);
+    T(1, g('q8b'),  78, 244, 7.5);
+  } else if (state.q8 === 'Tidak') { X(1, 95, 306); }
 
   if (state.q9 === 'Ya') {
-    drawX(1, 644.6, 58.0);
-    drawText(1, g('q9a'), 152, 684, 7.5);
-    drawText(1, fmtDate(g('q9b')), 230, 706, 7.5);
-    drawText(1, g('q9c'), 80, 728, 7.5);
-  } else if (state.q9 === 'Tidak') { drawX(1, 644.6, 97.0); }
+    X(1, 56, 196);
+    T(1, g('q9a'), 150, 159, 7.5);
+    T(1, fmtDate(g('q9b')), 153, 139, 7.5);
+    T(1, g('q9c'),  45, 114, 7.5);
+  } else if (state.q9 === 'Tidak') { X(1, 95, 196); }
 
-  // PAGE 3: Q10-Q12
+  // ══ PAGE 3 ══════════════════════════════════════════════════════════════
   if (state.q10 === 'Ya') {
-    drawX(2, 77.2, 58.3);
-    drawText(2, fmtDate(g('q10a')), 230, 92, 7.5);
-  } else if (state.q10 === 'Tidak') { drawX(2, 77.2, 97.4); }
+    X(2, 56, 763);
+    T(2, fmtDate(g('q10a')), 190, 738, 7.5);
+  } else if (state.q10 === 'Tidak') { X(2, 95, 763); }
 
   if (state.q11 === 'Ya') {
-    drawX(2, 142.8, 58.3);
-    drawText(2, g('q11a'), 45, 172, 7.5);
-  } else if (state.q11 === 'Tidak') { drawX(2, 142.8, 97.4); }
+    X(2, 56, 697);
+    T(2, g('q11a'), 45, 658, 7.5);
+  } else if (state.q11 === 'Tidak') { X(2, 95, 697); }
 
   if (state.q12 === 'Ya') {
-    drawX(2, 221.9, 58.3);
-    drawText(2, g('q12a'), 80, 262, 7.5);
-    drawText(2, g('q12b'), 115, 287, 7.5);
-  } else if (state.q12 === 'Tidak') { drawX(2, 221.9, 97.4); }
+    X(2, 56, 618);
+    T(2, g('q12a'),  88, 578, 7.5);
+    T(2, g('q12b'), 118, 556, 7.5);
+  } else if (state.q12 === 'Tidak') { X(2, 95, 618); }
 
   var outBytes = await pdfDoc.save();
   var blob = new Blob([outBytes], { type: 'application/pdf' });
   var url = URL.createObjectURL(blob);
   var a = document.createElement('a');
   a.href = url;
-  var name = g('nama') || 'Borang';
-  a.download = 'GMIQ_' + name.replace(/[^A-Za-z0-9]/g, '_') + '.pdf';
+  a.download = 'GMIQ_' + (g('nama') || 'Borang').replace(/[^A-Za-z0-9]/g, '_') + '.pdf';
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
-
   goPage(4);
 }
 
