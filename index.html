@@ -176,6 +176,28 @@
 
   .notice { font-size: 11px; color: #aaa; text-align: center; margin-top: 16px; line-height: 1.6; }
 
+  /* ── Mobile responsive ── */
+  @media (max-width: 480px) {
+    body { padding: 12px 8px 32px; }
+    .card { padding: 20px 16px; }
+    header { padding: 16px; }
+    .auto-row { grid-template-columns: 1fr; }
+    .radio-group { flex-direction: column; gap: 6px; }
+    .nav-row { flex-direction: column; }
+    .btn { padding: 14px; font-size: 15px; }
+    input[type="text"], textarea { font-size: 16px; }
+    .sig-area { min-height: 100px; }
+    .sig-preview { max-height: 80px; }
+    .wrapper { max-width: 100%; }
+  }
+
+  /* ── PDF Preview ── */
+  #pdf-preview-container { display: none; margin-top: 16px; }
+  #pdf-preview-container.visible { display: block; }
+  #pdf-preview-container iframe { width: 100%; height: 500px; border: 1px solid #e0ddd6; border-radius: 8px; background: #fff; }
+  #pdf-preview-container .preview-actions { display: flex; gap: 10px; margin-top: 12px; }
+  #pdf-preview-container .preview-actions .btn { flex: 1; }
+
   .page { display: none; }
   .page.active { display: block; }
 
@@ -278,6 +300,15 @@
         <input type="text" id="ic" class="ic-input" placeholder="xxxxxx-xx-xxxx" maxlength="14" oninput="formatIC(this)">
         <div class="ic-hint"><span class="bm">Masukkan nombor sahaja. Format: xxxxxx-xx-xxxx</span><span class="en">Enter numbers only. Format: xxxxxx-xx-xxxx</span></div>
         <div class="error-msg"><span class="bm">Sila masukkan No. KP yang lengkap.</span><span class="en">Please enter complete NRIC No.</span></div>
+      </div>
+
+      <div class="field" id="f-sijil">
+        <label>
+          <span class="bm">No. Sijil</span>
+          <span class="en">Certificate No.</span>
+        </label>
+        <input type="text" id="sijil" class="ic-input" placeholder="xxxxxxxxxx" maxlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+        <div class="ic-hint"><span class="bm">10 digit nombor sijil</span><span class="en">10 digit certificate number</span></div>
       </div>
 
       <div class="auto-row">
@@ -548,6 +579,22 @@
     </p>
   </div>
 
+  <!-- ═══════════════ PDF PREVIEW ═══════════════ -->
+  <div class="page" id="page-preview">
+    <div class="card">
+      <h2><span class="bm">Pratonton PDF</span><span class="en">PDF Preview</span></h2>
+      <div id="pdf-preview-container" class="visible">
+        <iframe id="pdf-iframe" src="about:blank"></iframe>
+        <div class="preview-actions">
+          <button class="btn btn-back" onclick="goPage(4)"><span class="bm">← Kembali & Edit</span><span class="en">← Back & Edit</span></button>
+          <button class="btn btn-submit" id="btn-download-final" onclick="downloadFinalPDF()" style="display:none">
+            <span class="bm">⬇ Muat Turun PDF</span><span class="en">⬇ Download PDF</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ═══════════════ SUCCESS PAGE ═══════════════ -->
   <div class="page" id="page5">
     <div class="success-card">
@@ -565,6 +612,33 @@
 <script>
 var state = { q4:'', q6:'', q7:'', q8:'', q9:'', q10:'', q11:'', q12:'' };
 var currentLang = 'bm';
+
+// ── localStorage auto-save/load ──
+var FORM_KEY = 'gmiq_form_data';
+function saveForm() {
+  var d={};
+  document.querySelectorAll('input[type="text"], input[type="date"], textarea, select').forEach(function(el){
+    if(el.id) d[el.id]=el.value;
+  });
+  d._state=JSON.stringify(state);
+  d._lang=currentLang;
+  try{localStorage.setItem(FORM_KEY,JSON.stringify(d));}catch(e){}
+}
+function loadForm() {
+  try{
+    var raw=localStorage.getItem(FORM_KEY); if(!raw) return;
+    var d=JSON.parse(raw);
+    Object.keys(d).forEach(function(k){
+      if(k==='_state'){ var s=JSON.parse(d[k]); Object.keys(s).forEach(function(kk){ if(state[kk]!==undefined){ state[kk]=s[kk]; toggle(kk, s[kk]); } }); return; }
+      if(k==='_lang'){ setLang(d[k]); return; }
+      var el=document.getElementById(k);
+      if(el && (el.tagName==='INPUT' || el.tagName==='TEXTAREA' || el.tagName==='SELECT')) el.value=d[k];
+    });
+  }catch(e){}
+}
+// Auto-save on any input change
+document.addEventListener('input', function(){ saveForm(); });
+window.addEventListener('DOMContentLoaded', loadForm);
 
 function setLang(lang) {
   currentLang = lang;
@@ -626,10 +700,11 @@ function toggle(q, val) {
 function goPage(n) {
   if (n===2 && !validatePage1()) return;
   if (n===3 && !validatePage2()) return;
-  for(var i=1;i<=5;i++){ var el=document.getElementById('page'+i); if(el) el.classList.remove('active'); }
-  var next=document.getElementById('page'+n);
+  if(typeof n==='number'){ for(var i=1;i<=5;i++){ var el=document.getElementById('page'+i); if(el) el.classList.remove('active'); } }
+  else { document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');}); }
+  var next=typeof n==='number'?document.getElementById('page'+n):document.getElementById(n);
   if(next) next.classList.add('active');
-  updateSteps(n); window.scrollTo(0,0);
+  if(typeof n==='number'){ updateSteps(n); window.scrollTo(0,0); }
 }
 
 function updateSteps(n) {
@@ -675,8 +750,8 @@ function validatePage4() {
   return ok;
 }
 
-function showErr(id){ var el=document.getElementById(id); if(el) el.classList.add('has-error'); }
-function clearErr(id){ var el=document.getElementById(id); if(el) el.classList.remove('has-error'); }
+function showErr(id){ var el=document.getElementById(id); if(el){ el.classList.add('has-error'); if(!document.querySelector('.scroll-target')) el.scrollIntoView({behavior:'smooth',block:'center'}); el.classList.add('scroll-target'); } }
+function clearErr(id){ var el=document.getElementById(id); if(el){ el.classList.remove('has-error'); el.classList.remove('scroll-target'); } }
 function g(id){ return (document.getElementById(id)||{}).value||''; }
 
 /* ===== Signature Processing ===== */
@@ -785,8 +860,17 @@ async function submitForm() {
     }
   }
 
+  function writeSijil(pi,val,x,y,sz,sp){
+    if(!val)return;
+    var r=val.replace(/[^0-9]/g,'');if(r.length<10)return;
+    for(var i=0;i<10;i++){
+      pages[pi].drawText(r[i],{x:x+i*sp,y:y,size:sz,font:font,color:PDFLib.rgb(0,0,0)});
+    }
+  }
+
   // PAGE 1
   T(0,g('nama'),173,346,8);
+  writeSijil(0,g('sijil'),88,736,8,14.5);
   writeIC(0,g('ic'),338,758,8,14.5);
   T(0,umur,68,322,8);
   if(jantina==='Lelaki'){X(0,221,322);}else{X(0,279,322);}
@@ -829,19 +913,29 @@ async function submitForm() {
 
   var outBytes=await pdfDoc.save();
   window._lastPDF = outBytes;
+  window._lastPDFName = 'GMIQ_'+(g('nama')||'Borang').replace(/[^A-Za-z0-9]/g,'_')+'.pdf';
   var blob=new Blob([outBytes],{type:'application/pdf'});
   var url=URL.createObjectURL(blob);
+  window._pdfPreviewUrl = url;
+  // Show preview
+  document.getElementById('pdf-iframe').src=url;
+  document.getElementById('btn-download-final').style.display='block';
+  goPage('page-preview');
+}
+
+function downloadFinalPDF(){
   var a=document.createElement('a');
-  a.href=url;
-  a.download='GMIQ_'+(g('nama')||'Borang').replace(/[^A-Za-z0-9]/g,'_')+'.pdf';
+  a.href=window._pdfPreviewUrl;
+  a.download=window._lastPDFName||'GMIQ_Borang.pdf';
   document.body.appendChild(a);a.click();document.body.removeChild(a);
-  URL.revokeObjectURL(url);
   goPage(5);
 }
 
 function dataURLtoBytes(d){return Uint8Array.from(atob(d.split(',')[1]),function(c){return c.charCodeAt(0);});}
 
 function resetForm(){
+  if(!confirm('Hapus semua data? / Delete all data?')) return;
+  localStorage.removeItem('gmiq_form_data');
   document.querySelectorAll('input[type="text"], input[type="date"], textarea').forEach(function(el){el.value='';});
   document.getElementById('display-umur').textContent='—';document.getElementById('display-umur').className='auto-value';
   document.getElementById('display-jantina').textContent='—';document.getElementById('display-jantina').className='auto-value';
